@@ -27,11 +27,20 @@
         "description": "Ask the local Programming Assistant about your code."
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "programmingAssistant",
+          "title": "Programming Assistant",
+          "icon": "media/assistant.svg"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "programmingAssistant": [
         {
           "id": "programmingAssistant.chatView",
-          "name": "Programming Assistant"
+          "name": "Chat"
         }
       ]
     },
