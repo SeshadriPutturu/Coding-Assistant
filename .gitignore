@@ -1,0 +1,10 @@
+.gradle/
+build/
+*/build/
+out/
+.idea/
+*.iml
+*.log
+.env
+vscode-extension/node_modules/
+vscode-extension/dist/

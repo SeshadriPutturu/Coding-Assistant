@@ -1,0 +1,52 @@
+{
+  "name": "programming-assistant-vscode",
+  "displayName": "Programming Assistant",
+  "description": "A local Spring AI programming assistant for VS Code.",
+  "version": "0.1.0",
+  "publisher": "local-development",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": ["Other"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "programmingAssistant.ask",
+        "title": "Programming Assistant: Ask Assistant"
+      },
+      {
+        "command": "programmingAssistant.explainSelection",
+        "title": "Programming Assistant: Explain Selected Code"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "programmingAssistant.chatView",
+          "name": "Programming Assistant"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Programming Assistant",
+      "properties": {
+        "programmingAssistant.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "Base URL of the local Programming Assistant backend."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.95.0",
+    "typescript": "^5.7.2"
+  }
+}
