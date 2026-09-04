@@ -20,6 +20,13 @@
         "title": "Programming Assistant: Explain Selected Code"
       }
     ],
+    "chatParticipants": [
+      {
+        "id": "programmingAssistant.chat",
+        "name": "assistant",
+        "description": "Ask the local Programming Assistant about your code."
+      }
+    ],
     "views": {
       "explorer": [
         {

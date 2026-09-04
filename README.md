@@ -107,10 +107,13 @@ npm run compile
 1. Open the repository in VS Code.
 2. Run `npm install` in `vscode-extension`.
 3. Press `F5` and choose **Run Programming Assistant Extension**.
-4. Open **Programming Assistant** from the Activity Bar.
+4. In the Extension Development Host, use `@assistant` in the native Chat panel, or open
+	**Programming Assistant** from the Activity Bar.
 
 The extension connects to `http://localhost:8080` by default. Change the URL with the
-`programmingAssistant.backendUrl` VS Code setting if the backend runs elsewhere.
+`programmingAssistant.backendUrl` VS Code setting if the backend runs elsewhere. The Command
+Palette also provides **Programming Assistant: Explain Selected Code** for the active editor
+selection.
 
 ## Troubleshooting
 

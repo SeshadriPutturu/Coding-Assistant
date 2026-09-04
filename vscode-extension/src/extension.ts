@@ -7,8 +7,21 @@ interface ChatResponse {
 
 export function activate(context: vscode.ExtensionContext): void {
   const provider = new AssistantViewProvider(context.extensionUri);
+  const chatParticipant = vscode.chat.createChatParticipant('programmingAssistant.chat', async (request, _context, response, token) => {
+    if (token.isCancellationRequested) return;
+
+    try {
+      const data = await requestAssistant(request.prompt);
+      if (!token.isCancellationRequested) response.markdown(data.answer);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unknown request error';
+      response.markdown(`Could not reach the assistant: ${reason}`);
+    }
+  });
+  chatParticipant.iconPath = vscode.Uri.joinPath(context.extensionUri, 'media', 'assistant.svg');
 
   context.subscriptions.push(
+    chatParticipant,
     vscode.window.registerWebviewViewProvider('programmingAssistant.chatView', provider),
     vscode.commands.registerCommand('programmingAssistant.ask', () => provider.focusInput()),
     vscode.commands.registerCommand('programmingAssistant.explainSelection', () => {
@@ -21,6 +34,20 @@ export function activate(context: vscode.ExtensionContext): void {
       provider.openWithQuestion(`Explain this ${editor?.document.languageId ?? ''} code:\n\n${selectedCode}`);
     })
   );
+}
+
+async function requestAssistant(message: string, conversationId?: string): Promise<ChatResponse> {
+  const backendUrl = vscode.workspace.getConfiguration('programmingAssistant').get<string>(
+    'backendUrl',
+    'http://localhost:8080'
+  );
+  const response = await fetch(`${backendUrl.replace(/\/$/, '')}/api/v1/assistant/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, conversationId })
+  });
+  if (!response.ok) throw new Error(`Backend returned HTTP ${response.status}`);
+  return (await response.json()) as ChatResponse;
 }
 
 class AssistantViewProvider implements vscode.WebviewViewProvider {
@@ -52,23 +79,11 @@ class AssistantViewProvider implements vscode.WebviewViewProvider {
 
   private async ask(message: string): Promise<void> {
     this.view?.webview.postMessage({ type: 'loading' });
-    const backendUrl = vscode.workspace.getConfiguration('programmingAssistant').get<string>(
-      'backendUrl',
-      'http://localhost:8080'
-    );
 
     try {
-      const response = await fetch(`${backendUrl.replace(/\/$/, '')}/api/v1/assistant/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, conversationId: this.conversationId })
-      });
-      if (!response.ok) {
-        throw new Error(`Backend returned HTTP ${response.status}`);
-      }
-      const data = (await response.json()) as ChatResponse;
+      const data = await requestAssistant(message, this.conversationId);
       this.conversationId = data.conversationId;
-      this.view?.webview.postMessage({ type: 'answer', answer: data.answer, conversationId: data.conversationId });
+      this.view?.webview.postMessage({ type: 'answer', answer: data.answer || 'The assistant returned no text.' });
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown request error';
       this.view?.webview.postMessage({ type: 'error', message: `Could not reach the assistant: ${reason}` });
